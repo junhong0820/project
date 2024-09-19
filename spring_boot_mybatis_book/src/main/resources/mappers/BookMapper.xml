@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.spring_boot_mybatis_book.project.dao.IBookDAO">
+<!-- select 진행 시 반환되는 데이터를 표현하는 태그 먼저 구성 : resultMap태그 (태그내에서 사용할 레코드 저장 단위(model)를 표현해야 함) -->
+<!-- resultSet의 기능 : BookVO타입을 원소로 갖는 ArrayList가 반환(레코드가 2개 이상일 경우), 레코드가 1개면 BookVO 클래스 객체가 반환(resultMap 사용하지 않음) -->
+<resultMap id="bookResult" type="com.spring_boot_mybatis_book.project.model.BookVO">
+		<result property="bookNo" column="bookNo"/><!-- VO클래스의 각 필드와 column 매핑  -->
+  		<result property="bookName" column="bookName"  />
+  		<result property="bookAuthor" column="bookAuthor"  />
+  		<result property="bookPrice" column="bookPrice"  />
+  		<result property="bookDate" column="bookDate"  />
+  		<result property="bookStock" column="bookStock"  />
+  		<result property="pubNo" column="pubNo"  />	
+</resultMap>
+
+<!-- 전체 도서 정보 조회에 해당하는 추상메소드 구현 설정  -->
+<select id="listAllBook" resultMap="bookResult">
+	SELECT * FROM book ORDER BY bookNo
+</select>
+
+<!-- 새 도서 정보 등록하는 추상메소드 구현 설정 모든 컬럼에 데이터 추가시에는 컬럼명은 생략가능 -->
+<insert id="insertBook" parameterType="com.spring_boot_mybatis_book.project.model.BookVO">
+	INSERT INTO book(bookNo,bookName,bookAuthor,bookPrice,bookDate,bookStock, pubNo)
+	VALUES(#{bookNo},#{bookName},#{bookAuthor},#{bookPrice},#{bookDate},#{bookStock},#{pubNo})
+</insert>
+
+<!-- 도서 상세정보 조회 조건절에 사용하기위한 parameterType 필요, 반환하기 위한 resultType 필요 -->
+<select id="detailViewBook" parameterType="string" resultType="com.spring_boot_mybatis_book.project.model.BookVO">
+	SELECT * FROM book WHERE bookNo=#{bookNo}
+</select>
+
+<!-- 도서 정보 수정 BookVO 클래스 참조값 파라미터로 받고 수정 진행, bookNo는 수정하지 않고 조건식에 사용  -->
+<update id="updateBook" parameterType="com.spring_boot_mybatis_book.project.model.BookVO">
+	UPDATE book SET bookName = #{bookName},bookAuthor = #{bookAuthor}, bookPrice = #{bookPrice},
+  	             bookDate = #{bookDate}, bookStock = #{bookStock}, pubNo = #{pubNo}
+	WHERE bookNo = #{bookNo}
+</update>
+
+<!-- 도서정보 삭제 -->
+<delete id="deleteBook" parameterType="string">
+	DELETE FROM book WHERE bookNo=#{bookNo}
+</delete>
+
+<!-- 도서번호 중복 조회 : 반환되는 데이터는 도서번호거나 null 값 반환 -->
+<select id="bookNoCheck" resultType="string" parameterType="string">
+	SELECT bookNo FROM book WHERE 	bookNo = #{bookNo}
+</select>
+
+<!--도서검색 : keyword를 포함하는 조건으로 검색  bookName LIKE '%자바%' 
+	|| : 기호 (오라클 sql의 문자열 결합 연산자), mySql은 CONCAT() 사용해야 함
+-->
+<select id="bookSearch" parameterType="hashmap" resultMap="bookResult" >
+	SELECT * FROM book WHERE
+		<choose>
+			<when test="type !=null and type.equals('bookName')">
+				bookName LIKE '%'||#{keyword}|| '%'
+			</when>
+			<when test="type !=null and type.equals('pubNo')">
+				pubNo LIKE '%'||#{keyword}|| '%'
+			</when>		
+		</choose>
+</select>
+
+
+</mapper>  
+
+
+
+
+
