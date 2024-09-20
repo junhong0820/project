@@ -12,5 +12,9 @@ public class WebConfig implements WebMvcConfigurer {
 				.addResourceLocations("file:///usr/local/project/product_images/product_images/"); // 서버 경로
 
 				//.addResourceLocations("file:///C:/springBootWorkspace/product_images/");
+		
+		//upload 폴더의 이미지 출력하기 위한 맵핑 설정
+		registry.addResourceHandler("/images/**")
+		.addResourceLocations("file:///usr/local/project/upload/"); // 서버 경로
 	}
 }
